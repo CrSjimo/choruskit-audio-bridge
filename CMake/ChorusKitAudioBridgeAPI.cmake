@@ -57,12 +57,12 @@ function(ck_target_plugin_config target)
         PUBLIC
             ChorusKit_PluginEditorName="${FUNC_PLUGIN_EDITOR_NAME}"
             ChorusKit_PluginConfigEnv="${FUNC_PLUGIN_CONFIG_ENV}"
-            ChorusKit_ForegroundColor=0x${FUNC_COLOR_FOREGROUND}
-            ChorusKit_ForegroundOnColor=0x${FUNC_COLOR_FOREGROUND_ON}
-            ChorusKit_ForegroundLabelColor=0x${FUNC_COLOR_FOREGROUND_LABEL}
-            ChorusKit_BackgroundMainColor=0x${FUNC_COLOR_BACKGROUND_MAIN}
-            ChorusKit_BackgroundSidebarColor=0x${FUNC_COLOR_BACKGROUND_SIDEBAR}
-            ChorusKit_BackgroundMessageColor=0x${FUNC_COLOR_BACKGROUND_MESSAGE}
-            ChorusKit_BackgroundErrorColor=0x${FUNC_COLOR_BACKGROUND_ERROR}
+            ChorusKit_ForegroundColor=0xff${FUNC_COLOR_FOREGROUND}
+            ChorusKit_ForegroundOnColor=0xff${FUNC_COLOR_FOREGROUND_ON}
+            ChorusKit_ForegroundLabelColor=0xff${FUNC_COLOR_FOREGROUND_LABEL}
+            ChorusKit_BackgroundMainColor=0xff${FUNC_COLOR_BACKGROUND_MAIN}
+            ChorusKit_BackgroundSidebarColor=0xff${FUNC_COLOR_BACKGROUND_SIDEBAR}
+            ChorusKit_BackgroundMessageColor=0xff${FUNC_COLOR_BACKGROUND_MESSAGE}
+            ChorusKit_BackgroundErrorColor=0xff${FUNC_COLOR_BACKGROUND_ERROR}
     )
 endfunction()
