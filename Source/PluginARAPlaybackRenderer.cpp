@@ -11,7 +11,7 @@
 #include "PluginARAPlaybackRenderer.h"
 
 //==============================================================================
-void ChorusKitPlaybackRenderer::prepareToPlay (double sampleRateIn, int maximumSamplesPerBlockIn, int numChannelsIn, juce::AudioProcessor::ProcessingPrecision, AlwaysNonRealtime alwaysNonRealtime)
+void PluginARAPlaybackRenderer::prepareToPlay (double sampleRateIn, int maximumSamplesPerBlockIn, int numChannelsIn, juce::AudioProcessor::ProcessingPrecision, AlwaysNonRealtime alwaysNonRealtime)
 {
     numChannels = numChannelsIn;
     sampleRate = sampleRateIn;
@@ -19,14 +19,14 @@ void ChorusKitPlaybackRenderer::prepareToPlay (double sampleRateIn, int maximumS
     useBufferedAudioSourceReader = alwaysNonRealtime == AlwaysNonRealtime::no;
 }
 
-void ChorusKitPlaybackRenderer::releaseResources()
+void PluginARAPlaybackRenderer::releaseResources()
 {
 }
 
 //==============================================================================
-bool ChorusKitPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
-                                                       juce::AudioProcessor::Realtime realtime,
-                                                       const juce::AudioPlayHead::PositionInfo& positionInfo) noexcept
+bool PluginARAPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
+                                              juce::AudioProcessor::Realtime realtime,
+                                              const juce::AudioPlayHead::PositionInfo& positionInfo) noexcept
 {
     const auto numSamples = buffer.getNumSamples();
     jassert (numSamples <= maximumSamplesPerBlock);

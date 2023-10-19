@@ -15,7 +15,7 @@
 //==============================================================================
 /**
 */
-class ChorusKitDocumentController  : public juce::ARADocumentControllerSpecialisation
+class PluginARADocumentController  : public juce::ARADocumentControllerSpecialisation
 {
 public:
     //==============================================================================
@@ -32,5 +32,5 @@ protected:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChorusKitDocumentController)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginARADocumentController)
 };

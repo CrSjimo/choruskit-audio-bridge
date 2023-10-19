@@ -15,7 +15,7 @@
 //==============================================================================
 /**
 */
-class ChorusKitPlaybackRenderer  : public juce::ARAPlaybackRenderer
+class PluginARAPlaybackRenderer  : public juce::ARAPlaybackRenderer
 {
 public:
     //==============================================================================
@@ -41,5 +41,5 @@ private:
     int numChannels = 1;
     bool useBufferedAudioSourceReader = true;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChorusKitPlaybackRenderer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginARAPlaybackRenderer)
 };

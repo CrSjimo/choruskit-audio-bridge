@@ -6,12 +6,22 @@
   ==============================================================================
 */
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "PluginAudioProcessor.h"
+#include "PluginAudioProcessorEditor.h"
+
+#include "Bridge.h"
+
+static juce::String formatStatusString(juce::StringRef str, bool isARA) {
+    return "Status: " + str + (isARA ? " (ARA)" : "");
+}
 
 //==============================================================================
-ChorusKitAudioProcessorEditor::ChorusKitAudioProcessorEditor(ChorusKitAudioProcessor &p)
+PluginAudioProcessorEditor::PluginAudioProcessorEditor(PluginAudioProcessor &p)
         : AudioProcessorEditor(&p), audioProcessor(p) {
+    if(ckBdg->getRemoteSocket()) {
+        ckBdg->getRemoteSocket()->addListener(this);
+    }
+
     mainButton.setButtonText(juce::String("Show ") + ChorusKit_PluginEditorName);
     mainButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ChorusKit_ForegroundColor));
     mainButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(ChorusKit_ForegroundOnColor));
@@ -23,8 +33,14 @@ ChorusKitAudioProcessorEditor::ChorusKitAudioProcessorEditor(ChorusKitAudioProce
     versionLabel.setColour(juce::Label::textColourId, juce::Colour(ChorusKit_BackgroundMessageColor));
     errorLabel.setColour(juce::Label::textColourId, juce::Colour(ChorusKit_BackgroundErrorColor));
     errorLabel.setJustificationType(juce::Justification::bottom);
-    versionLabel.setText(juce::String("Version ") + JucePlugin_VersionString, juce::dontSendNotification);
     versionLabel.setJustificationType(juce::Justification::right);
+
+    if (ckBdg->getRemoteSocket() && ckBdg->getRemoteSocket()->status() == talcs::RemoteSocket::Connected)
+        statusLabel.setText(formatStatusString("Connected", audioProcessor.isBoundToARA()), juce::dontSendNotification);
+    else
+        statusLabel.setText(formatStatusString("Not Connected", audioProcessor.isBoundToARA()), juce::dontSendNotification);
+    errorLabel.setText(ckBdg->getError(), juce::dontSendNotification);
+    versionLabel.setText(juce::String("Version ") + JucePlugin_VersionString, juce::dontSendNotification);
 
     addAndMakeVisible(statusLabel);
     addAndMakeVisible(errorLabel);
@@ -34,23 +50,36 @@ ChorusKitAudioProcessorEditor::ChorusKitAudioProcessorEditor(ChorusKitAudioProce
     std::cerr << "Initialized: Editor" << std::endl;
 }
 
-ChorusKitAudioProcessorEditor::~ChorusKitAudioProcessorEditor() {
+PluginAudioProcessorEditor::~PluginAudioProcessorEditor() {
+    if(ckBdg->getRemoteSocket()) {
+        ckBdg->getRemoteSocket()->removeListener(this);
+    }
 }
 
 //==============================================================================
-void ChorusKitAudioProcessorEditor::paint(juce::Graphics &g) {
+void PluginAudioProcessorEditor::paint(juce::Graphics &g) {
     g.fillAll(juce::Colour(ChorusKit_BackgroundMainColor));
     g.setColour(juce::Colour(ChorusKit_BackgroundSidebarColor));
     g.fillRect(0, 150, 400, 50);
 }
 
-void ChorusKitAudioProcessorEditor::resized() {
+void PluginAudioProcessorEditor::resized() {
     mainButton.setBounds(100, 50, 200, 50);
     statusLabel.setBounds(8, 176, 384, 16);
     errorLabel.setBounds(8, 16, 384, 160);
     versionLabel.setBounds(8, 176, 384, 16);
 }
 
-void ChorusKitAudioProcessorEditor::buttonClicked(juce::Button *) {
+void PluginAudioProcessorEditor::buttonClicked(juce::Button *) {
 
+}
+
+void PluginAudioProcessorEditor::socketStatusChanged(int newStatus, int oldStatus) {
+    if (newStatus == talcs::RemoteSocket::Connected) {
+        juce::MessageManagerLock mmLock;
+        statusLabel.setText(formatStatusString("Connected", audioProcessor.isBoundToARA()), juce::dontSendNotification);
+    } else if (oldStatus == talcs::RemoteSocket::Connected) {
+        juce::MessageManagerLock mmLock;
+        statusLabel.setText(formatStatusString("Not Connected", audioProcessor.isBoundToARA()), juce::dontSendNotification);
+    }
 }

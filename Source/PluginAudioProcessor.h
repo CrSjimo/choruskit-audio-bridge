@@ -13,15 +13,18 @@
 //==============================================================================
 /**
 */
-class ChorusKitAudioProcessor  : public juce::AudioProcessor
+
+class SingleInstanceGuard;
+
+class PluginAudioProcessor  : public juce::AudioProcessor
                             #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
                             #endif
 {
 public:
     //==============================================================================
-    ChorusKitAudioProcessor();
-    ~ChorusKitAudioProcessor() override;
+    PluginAudioProcessor();
+    ~PluginAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -58,5 +61,6 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChorusKitAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginAudioProcessor)
+    std::unique_ptr<SingleInstanceGuard> m_singleinstanceGuard;
 };

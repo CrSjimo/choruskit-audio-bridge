@@ -4,6 +4,8 @@ function(ck_add_audio_plugin target)
     set(multiValueArgs FORMATS)
     cmake_parse_arguments(FUNC "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+    find_package(Boost REQUIRED filesystem)
+
     juce_add_plugin(${target}
         VERSION ${FUNC_VERSION}
         COMPANY_NAME ${FUNC_VENDOR}
@@ -29,6 +31,9 @@ function(ck_add_audio_plugin target)
         PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
         juce::juce_audio_utils
+        TalcsRemote
+        Boost::boost
+        Boost::filesystem
         PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags

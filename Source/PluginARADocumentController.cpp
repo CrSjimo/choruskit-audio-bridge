@@ -12,13 +12,13 @@
 #include "PluginARAPlaybackRenderer.h"
 
 //==============================================================================
-juce::ARAPlaybackRenderer* ChorusKitDocumentController::doCreatePlaybackRenderer() noexcept
+juce::ARAPlaybackRenderer* PluginARADocumentController::doCreatePlaybackRenderer() noexcept
 {
-    return new ChorusKitPlaybackRenderer (getDocumentController());
+    return new PluginARAPlaybackRenderer (getDocumentController());
 }
 
 //==============================================================================
-bool ChorusKitDocumentController::doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept
+bool PluginARADocumentController::doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept
 {
     // You should use this method to read any persistent data associated with
     // your ARA model graph stored in an archive using the supplied ARAInputStream.
@@ -26,7 +26,7 @@ bool ChorusKitDocumentController::doRestoreObjectsFromStream (juce::ARAInputStre
     return true;
 }
 
-bool ChorusKitDocumentController::doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept
+bool PluginARADocumentController::doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept
 {
     // You should use this method to write any persistent data associated with
     // your ARA model graph into the an archive using the supplied ARAOutputStream.
@@ -38,5 +38,5 @@ bool ChorusKitDocumentController::doStoreObjectsToStream (juce::ARAOutputStream&
 // This creates the static ARAFactory instances for the plugin.
 const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory()
 {
-    return juce::ARADocumentControllerSpecialisation::createARAFactory<ChorusKitDocumentController>();
+    return juce::ARADocumentControllerSpecialisation::createARAFactory<PluginARADocumentController>();
 }
