@@ -14,6 +14,7 @@ namespace talcs {
 }
 
 class PluginAudioProcessor;
+class SingleInstanceGuard;
 
 class Bridge {
 public:
@@ -30,11 +31,11 @@ public:
     talcs::RemoteAudioSource *getRemoteAudioSource();
     talcs::RemoteEditorInterface *getRemoteEditorInterface();
 
-    JUCE_DECLARE_SINGLETON(Bridge, true)
+    JUCE_DECLARE_SINGLETON(Bridge, false)
 
 private:
     friend class PluginAudioProcessor;
-    Bridge() = default;
+    Bridge();
     juce::String m_error;
     juce::String m_editorProgramPath;
     talcs::RemoteSocket *m_remoteSocket = nullptr;
@@ -49,6 +50,8 @@ private:
             return thisBlockProcessInfo;
         }
     } m_bridgeProcessInfoContext = {};
+
+    std::unique_ptr<SingleInstanceGuard> m_singleInstanceGuard;
 };
 
 

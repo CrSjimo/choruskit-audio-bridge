@@ -1,25 +1,65 @@
 #include "Bridge.h"
 
-#include <Boost/process/spawn.hpp>
-#include <Boost/filesystem/detail/path_traits.hpp>
+#ifdef _WIN32
+#include <shlobj.h>
+#endif
 
-#include "RemoteSocket.h"
-#include "RemoteAudioSource.h"
-#include "RemoteEditorInterface.h"
+#include <RemoteSocket.h>
+#include <RemoteAudioSource.h>
+#include <RemoteEditorInterface.h>
+
+#include <memory>
+
+#include "SingleInstanceGuard.h"
 
 JUCE_IMPLEMENT_SINGLETON(Bridge)
+
+Bridge::Bridge() = default;
 
 Bridge::~Bridge() {
     finalize();
     clearSingletonInstance();
 }
 
-bool Bridge::initialize() {
-    juce::String configPath = getenv(ChorusKit_PluginConfigEnv);
-    if (configPath.isEmpty()) {
-        m_error = "Environment variable '" + juce::String(ChorusKit_PluginConfigEnv) + "' does not exists";
-        return false;
+static juce::String getConfigPath(juce::StringRef path) {
+#ifdef _WIN32
+    PWSTR appDataPath;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &appDataPath))) {
+        juce::String filePath = appDataPath;
+        filePath += ("/" + path);
+        CoTaskMemFree(appDataPath);
+        return filePath;
     }
+    return L"";
+#else
+    return "~/.config/" + path;
+#endif
+}
+
+#define FIND_STRING_PROPERTY(name) \
+if (!configObj->hasProperty(#name)) { \
+    m_error = "Config file is missing field: '" #name "'"; \
+    return false; \
+} \
+auto name##Var = configObj->getProperty(#name); \
+    if (!name##Var.isString()) { \
+    m_error = "Field '" #name "' should be 'String' in config file"; \
+    return false; \
+}                                  \
+
+#define FIND_INT_PROPERTY(name, l, r) \
+if (!configObj->hasProperty(#name)) { \
+    m_error = "Config file is missing field: '" #name "'"; \
+    return false; \
+} \
+auto name##Var = configObj->getProperty(#name); \
+if (!name##Var.isInt() || (int)name##Var < l|| (int)name##Var > r) { \
+    m_error = "Field '" #name "' should be 'Int' and within " #l " ~ " #r "in config file"; \
+    return false; \
+}
+
+bool Bridge::initialize() {
+    auto configPath = getConfigPath(ChorusKit_PluginConfigPath);
     juce::File configFile(configPath);
     if (!configFile.existsAsFile()) {
         m_error = "Cannot locate config file at '" + configPath + "'";
@@ -32,53 +72,41 @@ bool Bridge::initialize() {
     }
     auto configObj = configVar.getDynamicObject();
 
-    if (!configObj->hasProperty("editor")) {
-        m_error = "Config file is missing field: 'editor'";
+    //======== key ========//
+    FIND_STRING_PROPERTY(key)
+    m_singleInstanceGuard = std::make_unique<SingleInstanceGuard>(keyVar.toString());
+    if (!m_singleInstanceGuard->isPrimary()) {
+        m_error = "Another " + juce::StringRef(JucePlugin_Name) + " is running";
         return false;
     }
-    auto editorProgramPathVar = configObj->getProperty("editor");
-    if (!editorProgramPathVar.isString()) {
-        m_error = "Field 'editor' should be 'String' in config file";
-        return false;
-    }
-    m_editorProgramPath = editorProgramPathVar.toString();
 
-    if (!configObj->hasProperty("pluginPort")) {
-        m_error = "Config file is missing field: 'pluginPort'";
-        return false;
-    }
-    auto pluginPortVar = configObj->getProperty("pluginPort");
-    if (!pluginPortVar.isInt() || (int)pluginPortVar < 0 || (int)pluginPortVar > 65535) {
-        m_error = "Field 'pluginPort' should be 'Int' and within 0 ~ 65536 in config file";
-        return false;
-    }
-    juce::uint16 pluginPort = (int)pluginPortVar;
+    //======== editor ========//
+    FIND_STRING_PROPERTY(editor)
+    m_editorProgramPath = editorVar.toString();
 
-    if (!configObj->hasProperty("editorPort")) {
-        m_error = "Config file is missing field: 'editorPort'";
-        return false;
-    }
-    auto editorPortVar = configObj->getProperty("editorPort");
-    if (!editorPortVar.isInt() || (int)editorPortVar < 0 || (int)editorPortVar > 65535) {
-        m_error = "Field 'editorPort' should be 'Int' and within 0 ~ 65536 in config file";
-        return false;
-    }
-    juce::uint16 editorPort = (int)editorPortVar;
+    //======== pluginPort ========//
+    FIND_INT_PROPERTY(pluginPort, 0, 65535);
 
-    m_remoteSocket = new talcs::RemoteSocket(pluginPort, editorPort);
-    if (!m_remoteSocket->startServer()) {
-        m_error = "Remote socket cannot start server (port = " + juce::String(pluginPort) + ")";
+    //======== editorPort ========//
+    FIND_INT_PROPERTY(editorPort, 0, 65535)
+
+    //======== threadCount ========//
+    FIND_INT_PROPERTY(threadCount, 1, 16)
+
+    m_remoteSocket = new talcs::RemoteSocket((int)pluginPortVar, (int)editorPortVar);
+    if (!m_remoteSocket->startServer((int)threadCountVar)) {
+        m_error = "Remote socket cannot start server (port = " + juce::String((int)pluginPortVar) + ")";
         finalize();
         return false;
     }
     m_remoteAudioSource = new talcs::RemoteAudioSource(m_remoteSocket, 32, &m_bridgeProcessInfoContext);
     m_remoteEditorInterface = new talcs::RemoteEditorInterface(m_remoteSocket);
     if (!m_remoteSocket->startClient()) {
-        m_error = "Remote socket cannot start client (port = " + juce::String(editorPort) + ")";
+        m_error = "Remote socket cannot start client (port = " + juce::String((int)editorPortVar) + ")";
         finalize();
         return false;
     }
-//    startEditorProgram();
+    startEditorProgram();
     m_error.clear();
     return true;
 }
@@ -94,7 +122,7 @@ void Bridge::finalize() {
 }
 
 void Bridge::startEditorProgram() {
-    boost::process::spawn(m_editorProgramPath.toStdString(), "-vst");
+    juce::File(m_editorProgramPath).startAsProcess("-vst");
 }
 
 juce::String Bridge::getError() {

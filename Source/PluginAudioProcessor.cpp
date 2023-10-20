@@ -12,12 +12,11 @@
 
 #include "PluginAudioProcessorEditor.h"
 #include "Bridge.h"
-#include "SingleInstanceGuard.h"
 
 //==============================================================================
-PluginAudioProcessor::PluginAudioProcessor() : m_singleinstanceGuard(new SingleInstanceGuard("77F6E993-671E-4283-99BE-C1CD1FF5C09E")), // TODO
+PluginAudioProcessor::PluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-        AudioProcessor(BusesProperties()
+        : AudioProcessor(BusesProperties()
 #if !JucePlugin_IsMidiEffect
 #if !JucePlugin_IsSynth
                                  .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
@@ -185,7 +184,7 @@ void PluginAudioProcessor::getStateInformation(juce::MemoryBlock &destData) {
             std::cerr << "Cannot get data from editor." << std::endl;
             // TODO error message
         } else {
-            destData.copyFrom(data.data(), 0, data.size());
+            destData = juce::MemoryBlock(data.data(), data.size());
         }
     }
 }

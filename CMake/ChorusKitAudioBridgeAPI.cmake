@@ -4,7 +4,7 @@ function(ck_add_audio_plugin target)
     set(multiValueArgs FORMATS)
     cmake_parse_arguments(FUNC "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    find_package(Boost REQUIRED filesystem)
+    find_package(Boost REQUIRED)
 
     juce_add_plugin(${target}
         VERSION ${FUNC_VERSION}
@@ -33,7 +33,6 @@ function(ck_add_audio_plugin target)
         juce::juce_audio_utils
         TalcsRemote
         Boost::boost
-        Boost::filesystem
         PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
@@ -47,7 +46,7 @@ function(ck_target_plugin_config target)
     set(options)
     set(oneValueArgs
         PLUGIN_EDITOR_NAME
-        PLUGIN_CONFIG_ENV
+        PLUGIN_CONFIG_PATH
         COLOR_FOREGROUND
         COLOR_FOREGROUND_ON
         COLOR_FOREGROUND_LABEL
@@ -61,7 +60,7 @@ function(ck_target_plugin_config target)
     target_compile_definitions(${target}
         PUBLIC
             ChorusKit_PluginEditorName="${FUNC_PLUGIN_EDITOR_NAME}"
-            ChorusKit_PluginConfigEnv="${FUNC_PLUGIN_CONFIG_ENV}"
+            ChorusKit_PluginConfigPath="${FUNC_PLUGIN_CONFIG_PATH}"
             ChorusKit_ForegroundColor=0xff${FUNC_COLOR_FOREGROUND}
             ChorusKit_ForegroundOnColor=0xff${FUNC_COLOR_FOREGROUND_ON}
             ChorusKit_ForegroundLabelColor=0xff${FUNC_COLOR_FOREGROUND_LABEL}

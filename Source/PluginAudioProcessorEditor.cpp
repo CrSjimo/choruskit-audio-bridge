@@ -11,6 +11,8 @@
 
 #include "Bridge.h"
 
+#include <RemoteEditorInterface.h>
+
 static juce::String formatStatusString(juce::StringRef str, bool isARA) {
     return "Status: " + str + (isARA ? " (ARA)" : "");
 }
@@ -22,7 +24,7 @@ PluginAudioProcessorEditor::PluginAudioProcessorEditor(PluginAudioProcessor &p)
         ckBdg->getRemoteSocket()->addListener(this);
     }
 
-    mainButton.setButtonText(juce::String("Show ") + ChorusKit_PluginEditorName);
+    mainButton.setButtonText(juce::StringRef("Show ") + ChorusKit_PluginEditorName);
     mainButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ChorusKit_ForegroundColor));
     mainButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(ChorusKit_ForegroundOnColor));
     mainButton.setColour(juce::TextButton::textColourOnId, juce::Colour(ChorusKit_ForegroundLabelColor));
@@ -40,20 +42,27 @@ PluginAudioProcessorEditor::PluginAudioProcessorEditor(PluginAudioProcessor &p)
     else
         statusLabel.setText(formatStatusString("Not Connected", audioProcessor.isBoundToARA()), juce::dontSendNotification);
     errorLabel.setText(ckBdg->getError(), juce::dontSendNotification);
-    versionLabel.setText(juce::String("Version ") + JucePlugin_VersionString, juce::dontSendNotification);
+    versionLabel.setText(juce::StringRef("Version ") + JucePlugin_VersionString, juce::dontSendNotification);
+
+    if(!ckBdg->getError().isEmpty()) {
+        mainButton.setEnabled(false);
+    }
 
     addAndMakeVisible(statusLabel);
     addAndMakeVisible(errorLabel);
     addAndMakeVisible(versionLabel);
     addAndMakeVisible(mainButton);
     setSize(400, 200);
+    PluginAudioProcessorEditor::buttonClicked(&mainButton);
     std::cerr << "Initialized: Editor" << std::endl;
 }
 
 PluginAudioProcessorEditor::~PluginAudioProcessorEditor() {
-    if(ckBdg->getRemoteSocket()) {
+    if (ckBdg->getRemoteSocket())
         ckBdg->getRemoteSocket()->removeListener(this);
-    }
+
+    if (ckBdg->getRemoteEditorInterface())
+        ckBdg->getRemoteEditorInterface()->hideEditor();
 }
 
 //==============================================================================
@@ -71,7 +80,12 @@ void PluginAudioProcessorEditor::resized() {
 }
 
 void PluginAudioProcessorEditor::buttonClicked(juce::Button *) {
-
+    if (!ckBdg->getRemoteSocket() || !ckBdg->getRemoteEditorInterface())
+        return;
+    if (ckBdg->getRemoteSocket()->status() == talcs::RemoteSocket::Connected)
+        ckBdg->getRemoteEditorInterface()->showEditor();
+    else
+        ckBdg->startEditorProgram();
 }
 
 void PluginAudioProcessorEditor::socketStatusChanged(int newStatus, int oldStatus) {
