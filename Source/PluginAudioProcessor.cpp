@@ -30,6 +30,7 @@ PluginAudioProcessor::PluginAudioProcessor()
     if (!ckBdg->initialize()) {
         std::cerr << ckBdg->getError() << std::endl;
     }
+    ckBdg->getRemoteEditorInterface()->addListener(this);
 }
 
 PluginAudioProcessor::~PluginAudioProcessor() {
@@ -195,6 +196,10 @@ void PluginAudioProcessor::setStateInformation(const void *data, int sizeInBytes
                                                                        reinterpret_cast<const char *>(data) +
                                                                        sizeInBytes));
     }
+}
+
+void PluginAudioProcessor::markDirtyRequested() {
+    updateHostDisplay(ChangeDetails().withNonParameterStateChanged(true));
 }
 
 //==============================================================================

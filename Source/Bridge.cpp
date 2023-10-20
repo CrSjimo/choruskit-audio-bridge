@@ -8,10 +8,6 @@
 #include <RemoteAudioSource.h>
 #include <RemoteEditorInterface.h>
 
-#include <memory>
-
-#include "SingleInstanceGuard.h"
-
 JUCE_IMPLEMENT_SINGLETON(Bridge)
 
 Bridge::Bridge() = default;
@@ -72,20 +68,16 @@ bool Bridge::initialize() {
     }
     auto configObj = configVar.getDynamicObject();
 
-    //======== key ========//
-    FIND_STRING_PROPERTY(key)
-    m_singleInstanceGuard = std::make_unique<SingleInstanceGuard>(keyVar.toString());
-    if (!m_singleInstanceGuard->isPrimary()) {
-        m_error = "Another " + juce::StringRef(JucePlugin_Name) + " is running";
-        return false;
-    }
-
     //======== editor ========//
     FIND_STRING_PROPERTY(editor)
     m_editorProgramPath = editorVar.toString();
 
     //======== pluginPort ========//
     FIND_INT_PROPERTY(pluginPort, 0, 65535);
+    if (!juce::StreamingSocket().createListener(pluginPortVar, "127.0.0.1")) {
+        m_error = "The socket is occupied by another program";
+        return false;
+    }
 
     //======== editorPort ========//
     FIND_INT_PROPERTY(editorPort, 0, 65535)
@@ -94,7 +86,7 @@ bool Bridge::initialize() {
     FIND_INT_PROPERTY(threadCount, 1, 16)
 
     m_remoteSocket = new talcs::RemoteSocket((int)pluginPortVar, (int)editorPortVar);
-    if (!m_remoteSocket->startServer((int)threadCountVar)) {
+    if (!m_remoteSocket->startServer(threadCountVar)) {
         m_error = "Remote socket cannot start server (port = " + juce::String((int)pluginPortVar) + ")";
         finalize();
         return false;

@@ -53,7 +53,12 @@ PluginAudioProcessorEditor::PluginAudioProcessorEditor(PluginAudioProcessor &p)
     addAndMakeVisible(versionLabel);
     addAndMakeVisible(mainButton);
     setSize(400, 200);
-    PluginAudioProcessorEditor::buttonClicked(&mainButton);
+
+    if (ckBdg->getRemoteSocket() && ckBdg->getRemoteEditorInterface()) {
+        if (ckBdg->getRemoteSocket()->status() == talcs::RemoteSocket::Connected)
+            ckBdg->getRemoteEditorInterface()->showEditor();
+    }
+
     std::cerr << "Initialized: Editor" << std::endl;
 }
 

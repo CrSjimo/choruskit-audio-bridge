@@ -51,7 +51,6 @@ private:
         }
     } m_bridgeProcessInfoContext = {};
 
-    std::unique_ptr<SingleInstanceGuard> m_singleInstanceGuard;
 };
 
 

@@ -10,6 +10,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include <RemoteEditorInterface.h>
+
 //==============================================================================
 /**
 */
@@ -18,6 +20,7 @@ class PluginAudioProcessor  : public juce::AudioProcessor
                             #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
                             #endif
+                             , public talcs::RemoteEditorInterface::Listener
 {
 public:
     //==============================================================================
@@ -56,6 +59,8 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+
+    void markDirtyRequested() override;
 
 private:
     //==============================================================================
