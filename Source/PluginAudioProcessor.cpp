@@ -29,8 +29,9 @@ PluginAudioProcessor::PluginAudioProcessor()
     std::cerr << "PluginAudioProcessor: ctor" << std::endl;
     if (!ckBdg->initialize()) {
         std::cerr << ckBdg->getError() << std::endl;
+    } else {
+        ckBdg->getRemoteEditorInterface()->addListener(this);
     }
-    ckBdg->getRemoteEditorInterface()->addListener(this);
 }
 
 PluginAudioProcessor::~PluginAudioProcessor() {
