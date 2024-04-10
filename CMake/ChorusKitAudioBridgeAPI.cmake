@@ -48,7 +48,7 @@ function(ck_target_plugin_config target)
         PLUGIN_EDITOR_NAME
         PLUGIN_CONFIG_PATH
         COLOR_FOREGROUND
-        COLOR_FOREGROUND_ON
+        COLOR_FOREGROUND_BORDER
         COLOR_FOREGROUND_LABEL
         COLOR_BACKGROUND_MAIN
         COLOR_BACKGROUND_SIDEBAR
@@ -62,7 +62,7 @@ function(ck_target_plugin_config target)
             ChorusKit_PluginEditorName="${FUNC_PLUGIN_EDITOR_NAME}"
             ChorusKit_PluginConfigPath="${FUNC_PLUGIN_CONFIG_PATH}"
             ChorusKit_ForegroundColor=0xff${FUNC_COLOR_FOREGROUND}
-            ChorusKit_ForegroundOnColor=0xff${FUNC_COLOR_FOREGROUND_ON}
+            ChorusKit_ForegroundBorderColor=0xff${FUNC_COLOR_FOREGROUND_BORDER}
             ChorusKit_ForegroundLabelColor=0xff${FUNC_COLOR_FOREGROUND_LABEL}
             ChorusKit_BackgroundMainColor=0xff${FUNC_COLOR_BACKGROUND_MAIN}
             ChorusKit_BackgroundSidebarColor=0xff${FUNC_COLOR_BACKGROUND_SIDEBAR}

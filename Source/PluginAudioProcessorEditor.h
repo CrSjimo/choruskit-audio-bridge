@@ -8,8 +8,11 @@
 
 #pragma once
 
-#include "PluginAudioProcessor.h"
+#include <memory>
+
 #include <RemoteSocket.h>
+
+#include "PluginAudioProcessor.h"
 
 //==============================================================================
 /**
@@ -35,5 +38,6 @@ private:
     juce::Label statusLabel;
     juce::Label errorLabel;
     juce::Label versionLabel;
+    std::unique_ptr<juce::LookAndFeel> buttonLookAndFeel;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginAudioProcessorEditor)
 };

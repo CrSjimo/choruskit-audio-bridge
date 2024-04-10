@@ -11,11 +11,26 @@
 
 #include "Bridge.h"
 
-#include <RemoteEditorInterface.h>
-
 static juce::String formatStatusString(juce::StringRef str, bool isARA) {
     return "Status: " + str + (isARA ? " (ARA)" : "");
 }
+
+class PluginAudioProcessorEditorLookAndFeel : public juce::LookAndFeel_V4 {
+    void drawButtonBackground(juce::Graphics &g, juce::Button &button, const juce::Colour &backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override {
+        auto cornerSize = 6.0f;
+        auto bounds = button.getLocalBounds().toFloat().reduced (0.5f, 0.5f);
+
+        auto baseColour = backgroundColour.withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
+
+        if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
+            baseColour = baseColour.contrasting (shouldDrawButtonAsDown ? 0.2f : 0.05f);
+
+        g.setColour (baseColour);
+        g.fillRoundedRectangle (bounds, cornerSize);
+        g.setColour (button.findColour (juce::ComboBox::outlineColourId));
+        g.drawRoundedRectangle (bounds, cornerSize, 1.0f);
+    }
+};
 
 //==============================================================================
 PluginAudioProcessorEditor::PluginAudioProcessorEditor(PluginAudioProcessor &p)
@@ -24,9 +39,11 @@ PluginAudioProcessorEditor::PluginAudioProcessorEditor(PluginAudioProcessor &p)
         ckBdg->getRemoteSocket()->addListener(this);
     }
 
+    buttonLookAndFeel = std::make_unique<PluginAudioProcessorEditorLookAndFeel>();
+    mainButton.setLookAndFeel(buttonLookAndFeel.get());
     mainButton.setButtonText(juce::StringRef("Show ") + ChorusKit_PluginEditorName);
     mainButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ChorusKit_ForegroundColor));
-    mainButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(ChorusKit_ForegroundOnColor));
+    mainButton.setColour(juce::ComboBox::outlineColourId, juce::Colour(ChorusKit_ForegroundBorderColor));
     mainButton.setColour(juce::TextButton::textColourOnId, juce::Colour(ChorusKit_ForegroundLabelColor));
     mainButton.setColour(juce::TextButton::textColourOffId, juce::Colour(ChorusKit_ForegroundLabelColor));
     mainButton.addListener(this);
