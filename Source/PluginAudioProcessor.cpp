@@ -36,7 +36,7 @@ PluginAudioProcessor::PluginAudioProcessor()
 
 PluginAudioProcessor::~PluginAudioProcessor() {
     ckBdg->finalize();
-    delete ckBdg;
+    Bridge::deleteInstance();
 }
 
 //==============================================================================

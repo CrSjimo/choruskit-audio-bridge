@@ -25,11 +25,13 @@ public:
 
     void startEditorProgram();
 
-    juce::String getError();
+    juce::String getError() const;
 
-    talcs::RemoteSocket *getRemoteSocket();
-    talcs::RemoteAudioSource *getRemoteAudioSource();
-    talcs::RemoteEditorInterface *getRemoteEditorInterface();
+    talcs::RemoteSocket *getRemoteSocket() const;
+    talcs::RemoteAudioSource *getRemoteAudioSource() const;
+    talcs::RemoteEditorInterface *getRemoteEditorInterface() const;
+
+    juce::var getTheme() const;
 
     JUCE_DECLARE_SINGLETON(Bridge, false)
 
@@ -41,6 +43,7 @@ private:
     talcs::RemoteSocket *m_remoteSocket = nullptr;
     talcs::RemoteAudioSource *m_remoteAudioSource = nullptr;
     talcs::RemoteEditorInterface *m_remoteEditorInterface = nullptr;
+    juce::var m_theme;
 
     class : public talcs::RemoteAudioSource::ProcessInfoContext {
         friend class PluginAudioProcessor;

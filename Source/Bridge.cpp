@@ -85,6 +85,8 @@ bool Bridge::initialize() {
     //======== threadCount ========//
     FIND_INT_PROPERTY(threadCount, 1, 16)
 
+    m_theme = configObj->getProperty("theme");
+
     m_remoteSocket = new talcs::RemoteSocket((int)pluginPortVar, (int)editorPortVar);
     if (!m_remoteSocket->startServer(threadCountVar)) {
         m_error = "Remote socket cannot start server (port = " + juce::String((int)pluginPortVar) + ")";
@@ -117,18 +119,22 @@ void Bridge::startEditorProgram() {
     juce::File(m_editorProgramPath).startAsProcess("-vst");
 }
 
-juce::String Bridge::getError() {
+juce::String Bridge::getError() const {
     return m_error;
 }
 
-talcs::RemoteSocket *Bridge::getRemoteSocket() {
+talcs::RemoteSocket *Bridge::getRemoteSocket() const {
     return m_remoteSocket;
 }
 
-talcs::RemoteAudioSource *Bridge::getRemoteAudioSource() {
+talcs::RemoteAudioSource *Bridge::getRemoteAudioSource() const {
     return m_remoteAudioSource;
 }
 
-talcs::RemoteEditorInterface *Bridge::getRemoteEditorInterface() {
+talcs::RemoteEditorInterface *Bridge::getRemoteEditorInterface() const {
     return m_remoteEditorInterface;
+}
+
+juce::var Bridge::getTheme() const {
+    return m_theme;
 }

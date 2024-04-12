@@ -42,15 +42,15 @@ PluginAudioProcessorEditor::PluginAudioProcessorEditor(PluginAudioProcessor &p)
     buttonLookAndFeel = std::make_unique<PluginAudioProcessorEditorLookAndFeel>();
     mainButton.setLookAndFeel(buttonLookAndFeel.get());
     mainButton.setButtonText(juce::StringRef("Show ") + ChorusKit_PluginEditorName);
-    mainButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ChorusKit_ForegroundColor));
-    mainButton.setColour(juce::ComboBox::outlineColourId, juce::Colour(ChorusKit_ForegroundBorderColor));
-    mainButton.setColour(juce::TextButton::textColourOnId, juce::Colour(ChorusKit_ForegroundLabelColor));
-    mainButton.setColour(juce::TextButton::textColourOffId, juce::Colour(ChorusKit_ForegroundLabelColor));
+    mainButton.setColour(juce::TextButton::buttonColourId, juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("foreground", static_cast<int>(ChorusKit_ForegroundColor))))));
+    mainButton.setColour(juce::ComboBox::outlineColourId, juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("foregroundBorder", static_cast<int>(ChorusKit_ForegroundBorderColor))))));
+    mainButton.setColour(juce::TextButton::textColourOnId, juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("foregroundLabel", static_cast<int>(ChorusKit_ForegroundLabelColor))))));
+    mainButton.setColour(juce::TextButton::textColourOffId, juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("foregroundLabel", static_cast<int>(ChorusKit_ForegroundLabelColor))))));
     mainButton.addListener(this);
 
-    statusLabel.setColour(juce::Label::textColourId, juce::Colour(ChorusKit_BackgroundMessageColor));
-    versionLabel.setColour(juce::Label::textColourId, juce::Colour(ChorusKit_BackgroundMessageColor));
-    errorLabel.setColour(juce::Label::textColourId, juce::Colour(ChorusKit_BackgroundErrorColor));
+    statusLabel.setColour(juce::Label::textColourId, juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("backgroundMessage", static_cast<int>(ChorusKit_BackgroundMessageColor))))));
+    versionLabel.setColour(juce::Label::textColourId, juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("backgroundMessage", static_cast<int>(ChorusKit_BackgroundMessageColor))))));
+    errorLabel.setColour(juce::Label::textColourId, juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("backgroundError", static_cast<int>(ChorusKit_BackgroundErrorColor))))));
     errorLabel.setJustificationType(juce::Justification::bottom);
     versionLabel.setJustificationType(juce::Justification::right);
 
@@ -89,8 +89,8 @@ PluginAudioProcessorEditor::~PluginAudioProcessorEditor() {
 
 //==============================================================================
 void PluginAudioProcessorEditor::paint(juce::Graphics &g) {
-    g.fillAll(juce::Colour(ChorusKit_BackgroundMainColor));
-    g.setColour(juce::Colour(ChorusKit_BackgroundSidebarColor));
+    g.fillAll(juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("backgroundMain", static_cast<int>(ChorusKit_BackgroundMainColor))))));
+    g.setColour(juce::Colour(static_cast<juce::uint32>(int(ckBdg->getTheme().getProperty("backgroundSidebar", static_cast<int>(ChorusKit_BackgroundSidebarColor))))));
     g.fillRect(0, 150, 400, 50);
 }
 
