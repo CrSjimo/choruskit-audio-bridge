@@ -116,7 +116,7 @@ void Bridge::finalize() {
 }
 
 void Bridge::startEditorProgram() {
-    juce::File(m_editorProgramPath).startAsProcess("-vst");
+    m_editorProcess.start({m_editorProgramPath, "-vst"});
 }
 
 juce::String Bridge::getError() const {

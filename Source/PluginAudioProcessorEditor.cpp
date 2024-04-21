@@ -85,6 +85,7 @@ PluginAudioProcessorEditor::~PluginAudioProcessorEditor() {
 
     if (ckBdg->getRemoteEditorInterface())
         ckBdg->getRemoteEditorInterface()->hideEditor();
+    mainButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================

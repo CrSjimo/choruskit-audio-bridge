@@ -44,6 +44,7 @@ private:
     talcs::RemoteAudioSource *m_remoteAudioSource = nullptr;
     talcs::RemoteEditorInterface *m_remoteEditorInterface = nullptr;
     juce::var m_theme;
+    juce::ChildProcess m_editorProcess;
 
     class : public talcs::RemoteAudioSource::ProcessInfoContext {
         friend class PluginAudioProcessor;
