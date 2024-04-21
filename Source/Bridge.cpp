@@ -4,6 +4,8 @@
 #include <shlobj.h>
 #endif
 
+#include <juce_audio_processors/juce_audio_processors.h>
+
 #include <RemoteSocket.h>
 #include <RemoteAudioSource.h>
 #include <RemoteEditorInterface.h>
@@ -95,6 +97,7 @@ bool Bridge::initialize() {
     }
     m_remoteAudioSource = new talcs::RemoteAudioSource(m_remoteSocket, 32, &m_bridgeProcessInfoContext);
     m_remoteEditorInterface = new talcs::RemoteEditorInterface(m_remoteSocket);
+    m_remoteSocket->addListener(this);
     if (!m_remoteSocket->startClient()) {
         m_error = "Remote socket cannot start client (port = " + juce::String((int)editorPortVar) + ")";
         finalize();
@@ -137,4 +140,21 @@ talcs::RemoteEditorInterface *Bridge::getRemoteEditorInterface() const {
 
 juce::var Bridge::getTheme() const {
     return m_theme;
+}
+
+void Bridge::socketStatusChanged(int newStatus, int oldStatus) {
+    if (newStatus == talcs::RemoteSocket::Connected) {
+        m_remoteSocket->call("vstConnectionSystem", "setHostSpecs", juce::PluginHostType::getHostPath().toStdString(), []() -> std::string {
+            switch (juce::PluginHostType::getPluginLoadedAs()) {
+                case juce::AudioProcessor::wrapperType_VST3:
+                    return "VST3";
+                case juce::AudioProcessor::wrapperType_AudioUnit:
+                    return "Audio Unit";
+                case juce::AudioProcessor::wrapperType_LV2:
+                    return "LV2";
+                default:
+                    return "UNRECOGNIZED";
+            }
+        }());
+    }
 }

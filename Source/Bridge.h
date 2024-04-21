@@ -8,15 +8,12 @@
 #define ckBdg (Bridge::getInstance())
 
 namespace talcs {
-    class RemoteSocket;
-    class RemoteAudioSource;
     class RemoteEditorInterface;
 }
 
 class PluginAudioProcessor;
-class SingleInstanceGuard;
 
-class Bridge {
+class Bridge : public talcs::RemoteSocket::Listener {
 public:
     ~Bridge();
 
@@ -32,6 +29,8 @@ public:
     talcs::RemoteEditorInterface *getRemoteEditorInterface() const;
 
     juce::var getTheme() const;
+
+    void socketStatusChanged(int newStatus, int oldStatus) override;
 
     JUCE_DECLARE_SINGLETON(Bridge, false)
 
