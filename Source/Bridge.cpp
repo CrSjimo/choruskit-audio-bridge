@@ -89,13 +89,13 @@ bool Bridge::initialize() {
 
     m_theme = configObj->getProperty("theme");
 
-    m_remoteSocket = new talcs::RemoteSocket((int)pluginPortVar, (int)editorPortVar);
+    m_remoteSocket = new talcs::RemoteSocket(static_cast<juce::uint16>(int(pluginPortVar)), static_cast<juce::uint16>(int(editorPortVar)));
     if (!m_remoteSocket->startServer(threadCountVar)) {
         m_error = "Remote socket cannot start server (port = " + juce::String((int)pluginPortVar) + ")";
         finalize();
         return false;
     }
-    m_remoteAudioSource = new talcs::RemoteAudioSource(m_remoteSocket, 32, &m_bridgeProcessInfoContext);
+    m_remoteAudioSource = new talcs::RemoteAudioSource(m_remoteSocket, 32);
     m_remoteEditorInterface = new talcs::RemoteEditorInterface(m_remoteSocket);
     m_remoteSocket->addListener(this);
     if (!m_remoteSocket->startClient()) {
@@ -143,6 +143,7 @@ juce::var Bridge::getTheme() const {
 }
 
 void Bridge::socketStatusChanged(int newStatus, int oldStatus) {
+    juce::ignoreUnused(oldStatus);
     if (newStatus == talcs::RemoteSocket::Connected) {
         m_remoteSocket->call("vstConnectionSystem", "setHostSpecs", juce::PluginHostType::getHostPath().toStdString(), []() -> std::string {
             switch (juce::PluginHostType::getPluginLoadedAs()) {

@@ -13,6 +13,8 @@
 #include "PluginAudioProcessorEditor.h"
 #include "Bridge.h"
 
+static const size_t MAX_MIDI_SIZE = 1048576;
+
 //==============================================================================
 PluginAudioProcessor::PluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -143,23 +145,32 @@ void PluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    auto position = getPlayHead()->getPosition();
-    if (!position.hasValue()) {
-        ckBdg->m_bridgeProcessInfoContext.thisBlockProcessInfo = {
-                false,
-        };
-    } else {
-        using PositionInfo = talcs::RemoteAudioSource::ProcessInfo;
-        bool isPlaying = position->getIsPlaying() || position->getIsRecording();
-        ckBdg->m_bridgeProcessInfoContext.thisBlockProcessInfo = {
-            true,
-            isPlaying ? (isNonRealtime() ? PositionInfo::Playing : PositionInfo::RealtimePlaying)
-                      : PositionInfo::NotPlaying,
-            position->getTimeSignature().hasValue() ? position->getTimeSignature()->numerator : 0,
-            position->getTimeSignature().hasValue() ? position->getTimeSignature()->denominator : 0,
-            position->getBpm().orFallback(0.0),
-            position->getTimeInSamples().orFallback(0),
-        };
+    if (ckBdg->getRemoteAudioSource() && ckBdg->getRemoteAudioSource()->processInfo()) {
+        auto position = getPlayHead()->getPosition();
+        if (!position.hasValue()) {
+            ckBdg->m_remoteAudioSource->processInfo()->containsInfo = false;
+        } else {
+            bool isPlaying = position->getIsPlaying() || position->getIsRecording();
+            *ckBdg->m_remoteAudioSource->processInfo() = {
+                    true,
+                    isPlaying ? (isNonRealtime() ? talcs::RemoteProcessInfo::Playing : talcs::RemoteProcessInfo::RealtimePlaying)
+                              : talcs::RemoteProcessInfo::NotPlaying,
+                    position->getTimeSignature().hasValue() ? position->getTimeSignature()->numerator : 0,
+                    position->getTimeSignature().hasValue() ? position->getTimeSignature()->denominator : 0,
+                    position->getBpm().orFallback(0.0),
+                    position->getTimeInSamples().orFallback(0),
+            };
+            auto midiMessagesRawData = &ckBdg->m_remoteAudioSource->processInfo()->midiMessages;
+            midiMessagesRawData->size = midiMessages.getNumEvents();
+            auto midiMessagesRawDataPointer = reinterpret_cast<char *>(midiMessagesRawData->messages);
+            for (const auto &metadata : midiMessages) {
+                auto midiMessageRawData = reinterpret_cast<talcs::RemoteMidiMessage *>(midiMessagesRawDataPointer);
+                midiMessageRawData->size = metadata.numBytes;
+                midiMessageRawData->position = metadata.samplePosition;
+                std::copy(metadata.data, metadata.data + metadata.numBytes, midiMessageRawData->data);
+                midiMessagesRawDataPointer+= sizeof(talcs::RemoteMidiMessage) + metadata.numBytes - 1;
+            }
+        }
     }
 
     if (ckBdg->getRemoteAudioSource())

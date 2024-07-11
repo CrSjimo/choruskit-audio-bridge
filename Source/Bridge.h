@@ -45,15 +45,6 @@ private:
     juce::var m_theme;
     juce::ChildProcess m_editorProcess;
 
-    class : public talcs::RemoteAudioSource::ProcessInfoContext {
-        friend class PluginAudioProcessor;
-        talcs::RemoteAudioSource::ProcessInfo thisBlockProcessInfo{};
-    public:
-        talcs::RemoteAudioSource::ProcessInfo getThisBlockProcessInfo() const override {
-            return thisBlockProcessInfo;
-        }
-    } m_bridgeProcessInfoContext = {};
-
 };
 
 

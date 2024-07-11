@@ -11,7 +11,7 @@ function(ck_add_audio_plugin target)
         COMPANY_NAME ${FUNC_VENDOR}
         IS_ARA_EFFECT ${FUNC_ENABLE_ARA}
         IS_SYNTH TRUE                       # Is this a synth or an effect?
-        NEEDS_MIDI_INPUT FALSE               # Does the plugin need midi input?
+        NEEDS_MIDI_INPUT TRUE               # Does the plugin need midi input?
         NEEDS_MIDI_OUTPUT FALSE              # Does the plugin need midi output?
         PLUGIN_MANUFACTURER_CODE Juce               # A four-character manufacturer id with at least one upper-case character
         PLUGIN_CODE Dem0                            # A unique four-character plugin id with exactly one upper-case character
